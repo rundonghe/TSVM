@@ -1,7 +1,7 @@
 import numpy as np
 import scipy.io as scio
 
-def get_annthyroid(path='./annthyroid.mat', seed=2021):
+def get_satellite(path='./satellite.mat', seed=2021):
     rdg = np.random.RandomState(seed)
     datamat = scio.loadmat(path)
     X = datamat['X']    # (7200,6)
@@ -10,12 +10,14 @@ def get_annthyroid(path='./annthyroid.mat', seed=2021):
 
     X = X[perm[:len(X)]]
     y = y[perm[:len(y)]]
+    y = y.astype(np.float)
+    y[np.where(y == 0)] = -1
 
     Labeled_x = X[:500]
-    Labeled_y = y[:500]
+    Labeled_y = y[:500, 0]
 
     Unlabeled_x = X[500:]
-    Unlabeled_y = y[500:]
+    Unlabeled_y = y[500:, 0]
 
     return Labeled_x, Labeled_y, Unlabeled_x, Unlabeled_y
 

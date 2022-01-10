@@ -2,7 +2,7 @@
 import numpy as np
 import sklearn.svm as svm
 import joblib
-from dataset import get_annthyroid, get_data32
+from dataset import get_satellite, get_data32
 import pickle
 from sklearn.model_selection import train_test_split,cross_val_score
 
@@ -41,12 +41,14 @@ class TSVM(object):
 
         self.clf.fit(X1, Y1)
         Y2 = self.clf.predict(X2)
+        #Y2 = np.expand_dims(Y2, 1)
         X2_id = np.arange(len(X2))
         X3 = np.vstack([X1, X2])
         Y3 = np.concatenate((Y1, Y2), axis=0)
 
 
         while self.Cu < self.Cl:
+            print("Cu:", self.Cu, "Cl:", self.Cl)
             self.clf.fit(X3, Y3, sample_weight=sample_weight)
             while True:
                 Y2_d = self.clf.decision_function(X2)    # linear: w^Tx + b
@@ -60,7 +62,7 @@ class TSVM(object):
                 if a > 0 and b > 0 and a + b > 2.0:
                     Y2[positive_max_id] = Y2[positive_max_id] * -1
                     Y2[negative_max_id] = Y2[negative_max_id] * -1
-
+                    #Y2 = np.expand_dims(Y2, 1)
                     Y3 = np.concatenate((Y1, Y2), axis=0)
                     self.clf.fit(X3, Y3, sample_weight=sample_weight)
                 else:
@@ -109,7 +111,8 @@ class TSVM(object):
         joblib.dump(self.clf, path)
 
 if __name__ == '__main__':
-    Labeled_x, Labeled_y, Unlabeled_x, Unlabeled_y = get_data32(0)
+    #Labeled_x, Labeled_y, Unlabeled_x, Unlabeled_y = get_data32(0)
+    Labeled_x, Labeled_y, Unlabeled_x, Unlabeled_y = get_satellite()
     model = TSVM()
     model.initial()
     model.train(Labeled_x, Labeled_y, Unlabeled_x)
